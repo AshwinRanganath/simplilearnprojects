@@ -1,6 +1,8 @@
 package com.simplilearn.lockedme;
+import java.io.BufferedReader;
 import java.io.File;
 import java.io.FileInputStream;
+import java.io.FileReader;
 import java.io.FileWriter;
 import java.io.IOException;
 import java.io.InputStream;
@@ -284,6 +286,14 @@ public class LockedMeApp {
 		while(itr.hasNext()) {
 			System.out.println(itr.next());
 		}
+		System.err.println("Press enter to go back to homescreen");
+		try{ 
+			System.in.read();
+			welcomeScreen();
+			loginOptions();
+		} catch (Exception e) {	
+			e.printStackTrace();
+		}
 	}
 	
 	public static void deleteUser() throws IOException {
@@ -293,15 +303,28 @@ public class LockedMeApp {
 		File dir = new File("C:\\Users\\AsP\\Phase1-workspace\\FileHandlingtest\\Users\\Digilocker");
 		//File[] dir_contents = dir.listFiles();
 		String temp = uname + ".txt";
+		String filePath = "C:\\Users\\AsP\\Phase1-workspace\\FileHandlingtest\\Users\\users.txt";
 		boolean check = new File(dir, temp).exists();  
 		if(check) {
 			System.out.println("User found");
 			File file = new File("C:\\Users\\AsP\\Phase1-workspace\\FileHandlingtest\\Users\\Digilocker\\"+temp);
 			if (file.delete()) {
                 System.out.println("User deleted!");
-            } else {
-                System.out.println("Sorry, unable to delete the user. Retry");
+                modifyFile(filePath, uname, "");
+                System.out.println("Press enter to go back to homescreen");
+    			try{ 
+    				System.in.read();
+    				welcomeScreen();
+    				loginOptions();
+    			} catch (Exception e) {	
+    				e.printStackTrace();
+    			}
+            } 
+			else {
+                System.out.println("Sorry, unable to delete the user.");
+                System.err.println("Possible fix:- Restart the application and try again.");
             }
+			
 		}
 		else {
 			System.out.println("User not found");
@@ -412,6 +435,62 @@ public class LockedMeApp {
 		}
 		lockerScan.close();
 	}
+	
+	static void modifyFile(String filePath, String oldString, String newString)
+    {
+        File fileToBeModified = new File(filePath);
+         
+        String oldContent = "";
+         
+        BufferedReader reader = null;
+         
+        FileWriter writer = null;
+         
+        try
+        {
+            reader = new BufferedReader(new FileReader(fileToBeModified));
+             
+            //Reading all the lines of input text file into oldContent
+             
+            String line = reader.readLine();
+             
+            while (line != null) 
+            {
+                oldContent = oldContent + line + System.lineSeparator();
+                 
+                line = reader.readLine();
+            }
+             
+            //Replacing oldString with newString in the oldContent
+             
+            String newContent = oldContent.replaceAll(oldString, newString);
+             
+            //Rewriting the input text file with newContent
+             
+            writer = new FileWriter(fileToBeModified);
+             
+            writer.write(newContent);
+        }
+        catch (IOException e)
+        {
+            e.printStackTrace();
+        }
+        finally
+        {
+            try
+            {
+                //Closing the resources
+                 
+                reader.close();
+                 
+                writer.close();
+            } 
+            catch (IOException e) 
+            {
+                e.printStackTrace();
+            }
+        }
+    }
 
 	public static void main(String[] args) throws IOException {
 		fileInit();
