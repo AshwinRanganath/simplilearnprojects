@@ -8,7 +8,8 @@ public class Digilocker {
 	private String password;
 	
 	public Digilocker() {}
-
+	
+	
 	public Digilocker(String siteName, String loggedInUser, String username, String password) {
 		this.siteName = siteName;
 		this.loggedInUser = loggedInUser;

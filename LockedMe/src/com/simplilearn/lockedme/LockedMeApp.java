@@ -2,6 +2,7 @@ package com.simplilearn.lockedme;
 import java.io.BufferedReader;
 import java.io.File;
 import java.io.FileInputStream;
+import java.io.FileNotFoundException;
 import java.io.FileReader;
 import java.io.FileWriter;
 import java.io.IOException;
@@ -13,8 +14,6 @@ import java.util.InputMismatchException;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Scanner;
-
-
 
 
 import com.simplilearn.lockedme.model.Digilocker;
@@ -30,11 +29,18 @@ public class LockedMeApp {
 	public static void fileInit() throws IOException{
 		users = new File("C:\\Users\\AsP\\Phase1-workspace\\FileHandlingtest\\Users\\users.txt");
 		boolean filecheck = false;
-		
+
+		String path = "C:\\Users\\AsP\\Phase1-workspace\\FileHandlingtest\\Users\\Digilocker";
+		File lock = new File(path);
+		boolean dirCheck = false;
 		//checks if file is created 
 		if(users.createNewFile()) {
 			filecheck = true;
 			System.out.println(filecheck);
+		}
+		if(lock.mkdir()) {
+			dirCheck = true;
+			System.out.println(dirCheck);
 		}
 		write = new PrintWriter(new FileWriter(users,true));	
 	}
@@ -81,6 +87,7 @@ public class LockedMeApp {
 			
 			default : System.out.println("Invalid entry");		//if user enters value other than 1,2,3,4
 			break;
+			
 			}
 		}
 		
@@ -116,11 +123,28 @@ public class LockedMeApp {
 				}
 				else {
 					System.err.println("Wrong password");
+					found = true;
+					System.out.println("Press enter to go back to homescreen");
+					try{ 
+						System.in.read();
+						welcomeScreen();
+						loginOptions();
+					} catch (Exception e) {	
+						e.printStackTrace();
+					}
 				}
 			}
 		}
 		if(!found) {
-			System.out.println("User Not Found : Login Failure : 404");
+			System.out.println("User Not Found : Login Failure");
+			System.out.println("Press enter to go back to homescreen");
+			try{ 
+				System.in.read();
+				welcomeScreen();
+				loginOptions();
+			} catch (Exception e) {	
+				e.printStackTrace();
+			}
 		}
 		scan.close();
 		pwdCheck.close();
@@ -233,6 +257,7 @@ public class LockedMeApp {
 				System.in.read();
 				welcomeScreen();
 				loginOptions();
+				scan.close();
 			} catch (Exception e) {	
 				e.printStackTrace();
 			}
@@ -258,6 +283,7 @@ public class LockedMeApp {
 			case 2 : deleteUser();
 			break;
 			case 3 : welcomeScreen();
+			loginOptions();
 			break;
 			default : System.out.println("Invalid entry...");
 			scan.close();
@@ -286,7 +312,7 @@ public class LockedMeApp {
 		while(itr.hasNext()) {
 			System.out.println(itr.next());
 		}
-		System.err.println("Press enter to go back to homescreen");
+		System.out.println("Press enter to go back to homescreen");
 		try{ 
 			System.in.read();
 			welcomeScreen();
@@ -300,17 +326,20 @@ public class LockedMeApp {
 		System.out.println("Enter username of the user that is to be deleted");
 		scan = new Scanner(System.in);
 		String uname = scan.next();
+		String pword="";
 		File dir = new File("C:\\Users\\AsP\\Phase1-workspace\\FileHandlingtest\\Users\\Digilocker");
 		//File[] dir_contents = dir.listFiles();
 		String temp = uname + ".txt";
 		String filePath = "C:\\Users\\AsP\\Phase1-workspace\\FileHandlingtest\\Users\\users.txt";
 		boolean check = new File(dir, temp).exists();  
+		if(check) {pword = findPassword(uname);}
 		if(check) {
 			System.out.println("User found");
 			File file = new File("C:\\Users\\AsP\\Phase1-workspace\\FileHandlingtest\\Users\\Digilocker\\"+temp);
 			if (file.delete()) {
                 System.out.println("User deleted!");
                 modifyFile(filePath, uname, "");
+                modifyFile(filePath, pword, "");
                 System.out.println("Press enter to go back to homescreen");
     			try{ 
     				System.in.read();
@@ -322,9 +351,9 @@ public class LockedMeApp {
             } 
 			else {
                 System.out.println("Sorry, unable to delete the user.");
-                System.err.println("Possible fix:- Restart the application and try again.");
+           
+                System.out.println("Possible fix:- Restart the IDE and try again.");
             }
-			
 		}
 		else {
 			System.out.println("User not found");
@@ -336,13 +365,12 @@ public class LockedMeApp {
             default : exit();
             }
 		}
-		
-		
+		scan.close();
 	}
 	
 	//function to write into text file
 	public static void writeToFile(String username, String password) throws IOException {
-		   write.write(username + System.lineSeparator());
+		   write.write("\n"+username + System.lineSeparator());
 		   write.write(password + System.lineSeparator());
 		   write.write("\n");
 		   write.close();
@@ -393,21 +421,22 @@ public class LockedMeApp {
 		System.out.println("Enter Password :");
 		String password = scan.next();
 		locker.setPassword(password);
-		add = new PrintWriter(new FileWriter("C:\\Users\\AsP\\Phase1-workspace\\FileHandlingtest\\Users\\DigiLocker\\"+username+".txt"));
-		add.println("Website : "+locker.getSiteName());
-		add.println("Username : "+locker.getUsername());
-		add.println("Password : "+locker.getPassword());
-		
-		System.out.println("New credentials added to the locker!!!");
-		System.out.println("Press Enter to return to homescreen");
-		try{ 
+		add = new PrintWriter(new FileWriter("C:\\Users\\AsP\\Phase1-workspace\\FileHandlingtest\\Users\\DigiLocker\\"+username+".txt", true));
+		try {
+			add.print("Website : "+locker.getSiteName()+"\n");
+			add.write("Username : "+locker.getUsername()+"\n");
+			add.write("Password : "+locker.getPassword()+"\n");
+			add.flush();
+			System.out.println("New credentials added to the locker!!!");
+			System.out.println("Press Enter to return to homescreen");
 			System.in.read();
-			welcomeScreen();
-			loginOptions();
+				welcomeScreen();
+				loginOptions();
 		} catch (Exception e) {	
 			e.printStackTrace();
 		}
 		add.close(); 
+		scan.close();
 	}
 	
 	public static void displayData(String username) throws IOException {
@@ -433,42 +462,45 @@ public class LockedMeApp {
 		} catch (Exception e) {	
 			e.printStackTrace();
 		}
+		finally {
 		lockerScan.close();
+		ipStream.close();
+		}
+		
 	}
 	
-	static void modifyFile(String filePath, String oldString, String newString)
+	//this function is used to get the password from the text file (mainly used for delete function)
+	public static String findPassword(String username) throws FileNotFoundException {
+		String password="";
+		Scanner pwdCheck = new Scanner(users);
+		while(pwdCheck.hasNext()) {
+			if(pwdCheck.next().equals(username)) {
+				password = pwdCheck.next();
+			}
+		}
+		pwdCheck.close();
+		return password;
+	}
+	public static void modifyFile(String filePath, String oldString, String newString)
     {
-        File fileToBeModified = new File(filePath);
-         
-        String oldContent = "";
-         
+        File fileToBeModified = new File(filePath);        
+        String oldContent = "";         
         BufferedReader reader = null;
-         
         FileWriter writer = null;
-         
         try
         {
-            reader = new BufferedReader(new FileReader(fileToBeModified));
-             
-            //Reading all the lines of input text file into oldContent
-             
+            reader = new BufferedReader(new FileReader(fileToBeModified)); 
+            //Reading all the lines of input text file into oldContent 
             String line = reader.readLine();
-             
             while (line != null) 
             {
-                oldContent = oldContent + line + System.lineSeparator();
-                 
+                oldContent = oldContent + line + System.lineSeparator();   
                 line = reader.readLine();
             }
-             
-            //Replacing oldString with newString in the oldContent
-             
-            String newContent = oldContent.replaceAll(oldString, newString);
-             
+            //Replacing oldString with newString in the oldContent 
+            String newContent = oldContent.replaceFirst(oldString, newString);
             //Rewriting the input text file with newContent
-             
             writer = new FileWriter(fileToBeModified);
-             
             writer.write(newContent);
         }
         catch (IOException e)
@@ -479,10 +511,8 @@ public class LockedMeApp {
         {
             try
             {
-                //Closing the resources
-                 
-                reader.close();
-                 
+                //Closing the resources                
+                reader.close();                 
                 writer.close();
             } 
             catch (IOException e) 
@@ -490,9 +520,36 @@ public class LockedMeApp {
                 e.printStackTrace();
             }
         }
+        
     }
-
+	
+//	public static void removeBlanks() {
+//		Scanner file;
+//        PrintWriter writer;
+//        try {
+//            file = new Scanner(new File("C:\\Users\\AsP\\Phase1-workspace\\FileHandlingtest\\Users\\users.txt")); //sourcefile
+//            writer = new PrintWriter("C:\\Users\\AsP\\Phase1-workspace\\FileHandlingtest\\Users\\users1.txt"); //destinationfile
+//            //check for empty line
+//            while (file.hasNext()) {
+//                String line = file.nextLine();
+//                if (!line.isEmpty()) {
+//                    writer.write(line);
+//                    writer.write("\n");
+//                }
+//            }
+//            file.close();
+//            write.close();
+//    		File file3 = new File("C:\\Users\\AsP\\Phase1-workspace\\FileHandlingtest\\Users\\users1.txt");
+//    		File file2 = new File("C:\\Users\\AsP\\Phase1-workspace\\FileHandlingtest\\Users\\users.txt");
+//    		boolean success1 = file3.renameTo(file2);
+//    		System.out.println(success1);
+//        } catch (FileNotFoundException ex) {
+//        	System.out.println("File not found");
+//        }
+//	}
+	
 	public static void main(String[] args) throws IOException {
+		
 		fileInit();
 		welcomeScreen();
 		loginOptions();
